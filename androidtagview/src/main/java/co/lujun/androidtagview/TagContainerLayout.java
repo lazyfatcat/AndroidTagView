@@ -154,6 +154,12 @@ public class TagContainerLayout extends ViewGroup {
     /** The cross line width(default 1dp)*/
     private float mCrossLineWidth = 1.0f;
 
+    private int mSelectedBackgroundColor = Color.BLUE;
+
+    private int mSelectedTextColor = Color.WHITE;
+
+    private boolean mEnableMultiSelect = false;
+
     public TagContainerLayout(Context context) {
         this(context, null);
     }
@@ -222,6 +228,9 @@ public class TagContainerLayout extends ViewGroup {
                 dp2px(context, mCrossLineWidth));
         mTagSupportLettersRTL = attributes.getBoolean(R.styleable.AndroidTagView_tag_support_letters_rlt,
                 mTagSupportLettersRTL);
+        mEnableMultiSelect = attributes.getBoolean(R.styleable.AndroidTagView_tag_enable_multi_select, mEnableMultiSelect);
+        mSelectedBackgroundColor = attributes.getColor(R.styleable.AndroidTagView_tag_select_background_color, mSelectedBackgroundColor);
+        mSelectedTextColor = attributes.getColor(R.styleable.AndroidTagView_tag_select_text_color, mSelectedTextColor);
         attributes.recycle();
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -456,6 +465,9 @@ public class TagContainerLayout extends ViewGroup {
         tagView.setCrossColor(mCrossColor);
         tagView.setCrossLineWidth(mCrossLineWidth);
         tagView.setTagSupportLettersRTL(mTagSupportLettersRTL);
+        tagView.setSelectedBackgroundColor(mSelectedBackgroundColor);
+        tagView.setSelectedTextColor(mSelectedTextColor);
+        tagView.setEnableSelected(mEnableMultiSelect);
     }
 
     private void invalidateTags(){
@@ -1210,5 +1222,18 @@ public class TagContainerLayout extends ViewGroup {
      */
     public void setTagSupportLettersRTL(boolean mTagSupportLettersRTL) {
         this.mTagSupportLettersRTL = mTagSupportLettersRTL;
+    }
+
+    public List<Integer> getSelectedIndexs() {
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < mChildViews.size(); i++) {
+            if (mChildViews.get(i) instanceof TagView) {
+                TagView tagView = (TagView)mChildViews.get(i);
+                if (tagView.getIsSelected()) {
+                   list.add(i);
+                }
+            }
+        }
+        return list;
     }
 }

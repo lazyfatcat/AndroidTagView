@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,13 +69,20 @@ public class MainActivity extends AppCompatActivity {
         // Set custom click listener
         mTagContainerLayout1.setOnTagClickListener(new TagView.OnTagClickListener() {
             @Override
-            public void onTagClick(int position, String text) {
-                Toast.makeText(MainActivity.this, "click-position:" + position + ", text:" + text,
-                        Toast.LENGTH_SHORT).show();
+            public void onTagClick(TagView tagView, int position, String text) {
+                List<Integer> indices = mTagContainerLayout1.getSelectedIndexs();
+                StringBuilder sb = new StringBuilder();
+                for (Integer i : indices) {
+                    sb.append(String.format("%d # ", i.intValue()));
+                }
+                Log.d("aa", sb.toString());
+//                Toast.makeText(MainActivity.this, "click-position:" + position + ", text:" + text,
+//                        Toast.LENGTH_SHORT).show();
+//                tagView.setBackgroundColor(Color.CYAN);
             }
 
             @Override
-            public void onTagLongClick(final int position, String text) {
+            public void onTagLongClick(TagView tagView, final int position, String text) {
                 AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                         .setTitle("long click")
                         .setMessage("You will delete this tag!")
@@ -95,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onTagCrossClick(int position) {
+            public void onTagCrossClick(TagView tagView, int position) {
 //                mTagContainerLayout1.removeTag(position);
                 Toast.makeText(MainActivity.this, "Click TagView cross! position = " + position,
                         Toast.LENGTH_SHORT).show();

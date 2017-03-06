@@ -4,6 +4,7 @@ import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -113,6 +114,14 @@ public class TagView extends View {
 
     private float mCrossLineWidth;
 
+    private boolean mIsSelected = false;
+
+    private int mSelectedBackgroundColor = Color.BLUE;
+
+    private int mSelectedTextColor = Color.WHITE;
+
+    private boolean mEnableSelected = false;
+
     private Runnable mLongClickHandle = new Runnable() {
         @Override
         public void run() {
@@ -120,7 +129,7 @@ public class TagView extends View {
                 int state = ((TagContainerLayout)getParent()).getTagViewState();
                 if (state == ViewDragHelper.STATE_IDLE){
                     isExecLongClick = true;
-                    mOnTagClickListener.onTagLongClick((int) getTag(), getText());
+                    mOnTagClickListener.onTagLongClick(TagView.this, (int) getTag(), getText());
                 }
             }
         }
@@ -140,6 +149,7 @@ public class TagView extends View {
         mOriginText = text == null ? "" : text;
         mMoveSlop = (int) dp2px(context, mMoveSlop);
         mSlopThreshold = (int) dp2px(context, mSlopThreshold);
+        mIsSelected = false;
     }
 
     private void onDealText(){
@@ -183,7 +193,11 @@ public class TagView extends View {
     protected void onDraw(Canvas canvas) {
         // draw background
         mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setColor(mBackgroundColor);
+        if (!mIsSelected) {
+            mPaint.setColor(mBackgroundColor);
+        } else {
+            mPaint.setColor(mSelectedBackgroundColor);
+        }
         canvas.drawRoundRect(mRectF, mBorderRadius, mBorderRadius, mPaint);
 
         // draw border
@@ -197,7 +211,11 @@ public class TagView extends View {
 
         // draw text
         mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setColor(mTextColor);
+        if (!mIsSelected) {
+            mPaint.setColor(mTextColor);
+        } else {
+            mPaint.setColor(mSelectedTextColor);
+        }
 
         if (mTextDirection == View.TEXT_DIRECTION_RTL) {
             if (mTagSupportLettersRTL){
@@ -264,7 +282,7 @@ public class TagView extends View {
         }
         if (isEnableCross() && isClickCrossArea(event) && mOnTagClickListener != null){
             if (action == MotionEvent.ACTION_DOWN) {
-                mOnTagClickListener.onTagCrossClick((int) getTag());
+                mOnTagClickListener.onTagCrossClick(this, (int) getTag());
             }
             return true;
         }else if (isViewClickable && mOnTagClickListener != null){
@@ -292,7 +310,11 @@ public class TagView extends View {
                 case MotionEvent.ACTION_UP:
                     isUp = true;
                     if (!isExecLongClick && !isMoved) {
-                        mOnTagClickListener.onTagClick((int) getTag(), getText());
+                        if (mEnableSelected) {
+                            mIsSelected = !mIsSelected;
+                            invalidate();
+                        }
+                        mOnTagClickListener.onTagClick(this, (int) getTag(), getText());
                     }
                     break;
             }
@@ -429,9 +451,9 @@ public class TagView extends View {
     }
 
     public interface OnTagClickListener{
-        void onTagClick(int position, String text);
-        void onTagLongClick(int position, String text);
-        void onTagCrossClick(int position);
+        void onTagClick(TagView view, int position, String text);
+        void onTagLongClick(TagView view, int position, String text);
+        void onTagCrossClick(TagView view, int position);
     }
 
     public int getTextDirection() {
@@ -510,4 +532,21 @@ public class TagView extends View {
     public void setTagSupportLettersRTL(boolean mTagSupportLettersRTL) {
         this.mTagSupportLettersRTL = mTagSupportLettersRTL;
     }
+
+    public void setSelectedBackgroundColor(int color) {
+        this.mSelectedBackgroundColor = color;
+    }
+
+    public void setSelectedTextColor(int color) {
+        this.mSelectedTextColor= color;
+    }
+
+    public void setEnableSelected(boolean enable) {
+        this.mEnableSelected = enable;
+    }
+
+    public boolean getIsSelected() {
+        return this.mIsSelected;
+    }
+
 }
